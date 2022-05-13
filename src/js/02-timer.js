@@ -1,90 +1,77 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-import Notiflix from 'notiflix';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
-const refs = {
-  BtnStartEl: document.querySelector('button[data-start]'),
-  inputDays: document.querySelector('.field [data-days]'),
-  inputHours: document.querySelector('.field [data-hours]'),
-  inputMinutes: document.querySelector('.field [data-minutes]'),
-  inputSeconds: document.querySelector('.field [data-seconds]'),
-};
 
-refs.BtnStartEl.disabled = 'disabled';
-const SELECTED_DATA = 'selected-data-item';
+import Notiflix from 'notiflix';
+
+const startBtn = document.querySelector('[data-start]');
+const input = document.getElementById('datetime-picker');
+
+const days = document.querySelector('[data-days]');
+const hours = document.querySelector('[data-hours]');
+const minutes = document.querySelector('[data-minutes]');
+const seconds = document.querySelector('[data-seconds]');
+
+startBtn.disabled = true;
+let endDate = null;
+const timerId = null;
+
+function checkDate(dt) {
+  startBtn.disabled = true;
+
+  const now = new Date();
+  if (dt < now) {
+    Notiflix.Report.failure('Please choose a date in the future');
+    return;
+  }
+  startBtn.disabled = false;
+  endDate = dt.getTime();
+}
+
 const options = {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    if (this.selectedDates[0] > Date.now()) {
-      refs.BtnStartEl.disabled = null;
-      Notiflix.Notify.success('Goog! You choose a date in the future');
-    } else {
-      return Notiflix.Notify.failure('Please choose a date in the future');
-    }
+    checkDate(selectedDates[0]);
   },
 };
 
-const fp = flatpickr('#datetime-picker', options);
-const ACTION_DELAY = 1000;
+flatpickr(input, options);
 
-class Timer {
-  constructor({ onTick }) {
-    this.intervalId = null;
-    this.isActive = false;
-    this.onTick = onTick;
-  }
-  start() {
-    if (this.isActive) {
+startBtn.addEventListener('click', () => {
+  const timerId = setInterval(() => {
+    const now = new Date().getTime();
+    const t = endDate - now;
+    if (t < 0) {
+      clearInterval(timerId);
       return;
     }
-    const startTimeEl = fp.selectedDates[0].getTime();
-    this.isActive = true;
+    const res = convertMs(t);
 
-    this.intervalId = setInterval(() => {
-      const currentTimeEl = Date.now();
-      const deltaTime = startTimeEl - currentTimeEl;
-
-      if (deltaTime < 0) {
-        clearInterval(this.intervalId);
-        return;
-      }
-
-      const time = this.convertMs(deltaTime);
-      this.onTick(time);
-    }, ACTION_DELAY);
-
-    refs.BtnStartEl.disabled = 'disabled';
-  }
-  convertMs(ms) {
-    const second = 1000;
-    const minute = second * 60;
-    const hour = minute * 60;
-    const day = hour * 24;
-
-    const days = this.addLeadingZero(Math.floor(ms / day));
-    const hours = this.addLeadingZero(Math.floor((ms % day) / hour));
-    const minutes = this.addLeadingZero(Math.floor(((ms % day) % hour) / minute));
-    const seconds = this.addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
-
-    return { days, hours, minutes, seconds };
-  }
-  addLeadingZero(value) {
-    return String(value).padStart(2, '0');
-  }
-}
-
-const timer = new Timer({
-  onTick: renderInterface,
+    days.innerHTML = addLeadingZero(res.days);
+    hours.innerHTML = addLeadingZero(res.hours);
+    minutes.innerHTML = addLeadingZero(res.minutes);
+    seconds.innerHTML = addLeadingZero(res.seconds);
+    // console.log(res);
+  }, 1000);
+  Notiflix.Notify.success();
 });
 
-function renderInterface({ days, hours, minutes, seconds }) {
-  refs.inputDays.textContent = `${days}`;
-  refs.inputHours.textContent = `${hours}`;
-  refs.inputMinutes.textContent = `${minutes}`;
-  refs.inputSeconds.textContent = `${seconds}`;
+function addLeadingZero(num) {
+  return String(num).padStart(2, '0');
 }
 
-refs.BtnStartEl.addEventListener('click', timer.start.bind(timer));
+function convertMs(ms) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+
+  const days = Math.floor(ms / day);
+  const hours = Math.floor((ms % day) / hour);
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+
+  return { days, hours, minutes, seconds };
+}
