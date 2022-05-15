@@ -15,11 +15,16 @@ const onChangeColor = () => {
 const onClickStart = () => {
   timeIntervalId = setInterval(onChangeColor, 1000);
   btnStart.setAttribute('disabled', true);
+  btnStoP.removeAttribute('disabled');
+
+  
 };
 
 const onClickStop = () => {
   clearInterval(timeIntervalId);
+  btnStoP.setAttribute('disabled', true);
   btnStart.removeAttribute('disabled');
+  
 };
 
 btnStart.addEventListener('click', onClickStart);
