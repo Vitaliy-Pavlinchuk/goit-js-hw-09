@@ -22,7 +22,7 @@ const onClickStart = () => {
 
 const onClickStop = () => {
   clearInterval(timeIntervalId);
-  btnStoP.setAttribute('disabled', true);
+  btnStoP.setAttribute('disabled', false);
   btnStart.removeAttribute('disabled');
   
 };

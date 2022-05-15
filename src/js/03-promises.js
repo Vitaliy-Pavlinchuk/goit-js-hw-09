@@ -14,17 +14,15 @@ function createPromise(position, delay) {
 }
 
 const refs = {
-  delay: document.querySelector('[name="delay"]'),
-  step: document.querySelector('[name="step"]'),
-  amount: document.querySelector('[name="amount"]'),
   form: document.querySelector('.form'),
 };
 
 const onSubmitForm = e => {
   e.preventDefault();
-  const delay = Number.parseInt(refs.delay.value);
-  const step = Number.parseInt(refs.step.value);
-  const amount = Number.parseInt(refs.amount.value);
+
+  const delay = Number.parseInt(e.currentTarget.elements.delay.value);
+  const step = Number.parseInt(e.currentTarget.elements.step.value);
+  const amount = Number.parseInt(e.currentTarget.elements.amount.value);
 
   for (let i = 0; i < amount; i++) {
     const currentDelay = delay + step * i;
@@ -39,7 +37,3 @@ const onSubmitForm = e => {
 };
 
 refs.form.addEventListener('submit', onSubmitForm);
-
-
-
-
