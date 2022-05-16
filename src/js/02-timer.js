@@ -9,13 +9,16 @@ const hours = document.querySelector('[data-hours]');
 const minutes = document.querySelector('[data-minutes]');
 const seconds = document.querySelector('[data-seconds]');
 
-startBtn.disabled = true;
+
 let selectedTime = null;
 let interval = null;
 
 const checkData = selected => {
   if (selected > new Date()) {
-    toggleBtn(false);
+    if (interval === null) {
+      toggleBtn(false);
+    }
+ 
     selectedTime = selected;
     return;
   }
@@ -35,11 +38,7 @@ const options = {
 flatpickr(input, options);
 
 const toggleBtn = flag => {
-  if (flag) {
-    startBtn.setAttribute('disabled', flag);
-    return;
-  }
-  startBtn.removeAttribute('disabled');
+  startBtn.disabled = flag;
 };
 
 const addLeadingZero = value => {
@@ -68,7 +67,8 @@ function convertMs(ms) {
 const timerStart = () => {
   const time = new Date();
   if (time >= selectedTime) {
-    clearInterval(interval);
+    clearInterval(interval)
+    startBtn.disabled = false;
     return;
   }
 
